@@ -1,12 +1,14 @@
-import {Component, OnInit} from '@angular/core';
-import {Course, sortCoursesBySeqNo} from '../model/course';
-import {interval, noop, Observable, of, throwError, timer} from 'rxjs';
-import {catchError, delay, delayWhen, filter, finalize, map, retryWhen, shareReplay, tap} from 'rxjs/operators';
-import {HttpClient} from '@angular/common/http';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {CourseDialogComponent} from '../course-dialog/course-dialog.component';
+import { Component, OnInit } from '@angular/core';
+import { Course, sortCoursesBySeqNo } from '../model/course';
+import { Observable } from 'rxjs';
 import { CoursesService } from '../services/courses.service';
+import { map } from 'rxjs/operators';
 
+
+const enum CourseCategory {
+  BEGINNER = "BEGINNER",
+  ADVANCED = "ADVANCED"
+}
 
 @Component({
   selector: 'home',
@@ -19,32 +21,29 @@ export class HomeComponent implements OnInit {
 
   advancedCourses$: Observable<Course[]>;
 
-
   constructor(
     private coursesService: CoursesService
-  ) {
+  ) { }
 
+  static filterCourses(courses$: Observable<Course[]>, courseCategory: CourseCategory): Observable<Course[]> {
+    return courses$
+      .pipe(
+        map(courses => courses.filter(course => course.category === courseCategory))
+      );
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     const courses$ = this.coursesService.loadAllCourses()
       .pipe(
         map(courses => courses.sort(sortCoursesBySeqNo))
       );
 
-    this.beginnerCourses$ = courses$
-      .pipe(
-        map(courses => courses.filter(course => course.category === "BEGINNER"))
-      );
-
-    this.advancedCourses$ = courses$
-      .pipe(
-        map(courses => courses.filter(course => course.category === "ADVANCED"))
-      );
+    this.beginnerCourses$ = HomeComponent.filterCourses(courses$, CourseCategory.BEGINNER);
+    this.advancedCourses$ = HomeComponent.filterCourses(courses$, CourseCategory.ADVANCED);
   }
 
+
+  
+
+
 }
-
-
-
-
