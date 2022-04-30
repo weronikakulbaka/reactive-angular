@@ -33,6 +33,10 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.reloadCourses();
+  }
+
+  reloadCourses(): void {
     const courses$ = this.coursesService.loadAllCourses()
       .pipe(
         map(courses => courses.sort(sortCoursesBySeqNo))
@@ -43,7 +47,6 @@ export class HomeComponent implements OnInit {
   }
 
 
-  
 
 
 }
